@@ -1,0 +1,44 @@
+model:
+  base: Qwen/Qwen3-1.7B-Instruct
+  max_length: 2048
+
+lora:
+  r: 32
+  alpha: 64
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+data:
+  path: data/raw.jsonl
+  val_fraction: 0.1
+
+training:
+  output_dir: out/merged
+  adapter_dir: out/adapter
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8
+  learning_rate: 1.0e-4
+  min_learning_rate: 1.0e-5
+  warmup_steps: 20
+  num_train_epochs: 3
+  weight_decay: 0.0
+  logging_steps: 10
+  eval_steps: 50
+  save_steps: 100
+  save_total_limit: 1
+  time_limit_minutes: 90
+  seed: 1337
+
+publish:
+  model_name: xfrieren-1.7b
+  quant_types:
+    - Q8_0
+    - Q6_K
+    - Q4_K_M
