@@ -157,8 +157,12 @@ def generate(
             messages = item["messages"]
             if len(messages) != turns or messages[0]["content"] != scenario["opening"]:
                 raise ValueError("the answer does not match the requested conversation")
-        except ValueError:
-            counts["invalid_answer"] += 1
+        except ValueError as error:
+            if str(error).startswith("model request failed:"):
+                counts["provider_error"] += 1
+                print(f"Provider error: {error}", flush=True)
+            else:
+                counts["invalid_answer"] += 1
             continue
         item["kind"] = scenario["kind"]
         updated, faults = filter_conversations(kept + [item])
