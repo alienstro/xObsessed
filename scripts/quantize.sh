@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 STAGING="${1:-out/merged}"
 OUTPUT="${2:-out/gguf}"
-NAME="${3:-xfrieren-1.7b}"
+NAME="${3:-xobsessed-1.7b}"
 LLAMA_DIR="${LLAMA_CPP_DIR:-llama.cpp}"
 BUILD_JOBS="${BUILD_JOBS:-1}"
 [[ "$BUILD_JOBS" =~ ^[1-9][0-9]*$ ]]

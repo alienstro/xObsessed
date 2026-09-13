@@ -49,9 +49,9 @@ def test_the_probes_share_one_conversation():
     transcript, report = run_probes(answer)
     assert len(transcript) == 30
     assert report["passes"]
-    assert len(histories[0]) == 2
-    assert len(histories[-1]) == 60
-    assert histories[1][2] == {"role": "assistant", "content": "Not really."}
+    assert len(histories[0]) == 1
+    assert len(histories[-1]) == 59
+    assert histories[1][1] == {"role": "assistant", "content": "Not really."}
 
 
 def test_the_training_arguments_use_the_config_and_limit_workers(tmp_path):
@@ -66,18 +66,18 @@ def test_the_training_arguments_use_the_config_and_limit_workers(tmp_path):
     assert args.save_strategy.value == "no"
 
 
-def test_the_loader_rejects_invalid_data(tmp_path):
+def test_the_loader_reads_each_json_line(tmp_path):
     path = tmp_path / "data.jsonl"
-    path.write_text(json.dumps({"messages": []}) + "\n")
-    with pytest.raises(ValueError, match="quality"):
-        load_items(path)
+    first = {"messages": [{"role": "user", "content": "Hi."}, {"role": "assistant", "content": "Hello."}]}
+    path.write_text(json.dumps(first) + "\n\n" + json.dumps(first) + "\n")
+    assert load_items(path) == [first, first]
 
 
 def test_a_tiny_qwen_model_completes_one_lora_step(tmp_path):
     import torch
     from peft import LoraConfig, get_peft_model
     from transformers import Qwen3Config, Qwen3ForCausalLM, Trainer
-    from xfrieren.dataset import ChatDataset
+    from xobsessed.dataset import ChatDataset
     from test_dataset import FakeTokenizer, conversation
 
     torch.set_num_threads(1)

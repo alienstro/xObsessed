@@ -3,14 +3,12 @@
 import torch
 from torch.utils.data import Dataset
 
-from xfrieren.persona import SYSTEM_PROMPT
-
 IGNORE_INDEX = -100
-_MARKER = "__XFRIEREN_REPLY_BOUNDARY_7a83__"
+_MARKER = "__XOBSSESSED_REPLY_BOUNDARY_7a83__"
 
 
 def build_example(tokenizer, messages: list[dict], max_length: int) -> tuple[list[int], list[int]]:
-    """Return tokens and labels without system text, user text, or role headers."""
+    """Return tokens and labels without user text or role headers."""
     if type(max_length) is not int or max_length < 1:
         raise ValueError("max_length must be a positive integer")
     for index, message in enumerate(messages):
@@ -20,7 +18,7 @@ def build_example(tokenizer, messages: list[dict], max_length: int) -> tuple[lis
             or not message["content"].strip()
         ):
             raise ValueError("messages must alternate between nonempty user and assistant text")
-    turns = [{"role": "system", "content": SYSTEM_PROMPT}] + list(messages)
+    turns = list(messages)
 
     def render(subset):
         return tokenizer.apply_chat_template(

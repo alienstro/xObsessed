@@ -18,6 +18,10 @@ lora:
 data:
   path: data/raw.jsonl
   val_fraction: 0.1
+  source:
+    dataset: Skorcht/yandere-her-dataset
+    split: train
+    revision: main
 
 training:
   output_dir: out/merged
@@ -37,7 +41,7 @@ training:
   seed: 1337
 
 publish:
-  model_name: xfrieren-1.7b
+  model_name: xobsessed-1.7b
   quant_types:
     - Q8_0
     - Q6_K

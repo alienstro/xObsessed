@@ -9,30 +9,21 @@
 - Review `docs/DATA_REVIEW.md` before training.
 - Keep one active remote command.
 
-## Generate Data
+## Prepare Data
 
-Set one OpenAI-compatible chat endpoint. The endpoint can point to a hosted
-provider or a local server.
+The project uses the public dataset `Skorcht/yandere-her-dataset`.
+The prepare script downloads the dataset and writes `data/raw.jsonl`.
 
-```bash
-export LLM_API_URL="https://provider.example/v1/chat/completions"
-export LLM_MODEL="provider-model-name"
-export LLM_API_KEY="your-api-key"
-```
-
-Run the sample first.
+**Caution:** Pin the dataset revision in `configs/base.yaml` to a commit hash.
+The default value `main` moves when the owner changes the dataset.
 
 ```bash
-uv run python scripts/generate_data.py --count 40 --out data/sample.jsonl
+uv run python scripts/prepare_data.py
 ```
+
+The script prints the row count and the sha256 of the output file.
 
 Read twenty conversations and complete `docs/DATA_REVIEW.md`.
-
-Generate the full set only after the review.
-
-```bash
-uv run python scripts/generate_data.py --count 1200 --out data/raw.jsonl
-```
 
 ## Prepare the Pod
 
@@ -74,10 +65,19 @@ Warning: Keep the pod until the upload verifier reports success.
 
 ```bash
 scripts/pod.sh run scripts/push_to_hub.py --reviewed
-scripts/pod.sh run bash scripts/quantize.sh out/merged out/gguf xfrieren-1.7b
+scripts/pod.sh run bash scripts/quantize.sh out/merged out/gguf xobsessed-1.7b
 scripts/pod.sh run scripts/push_to_hub.py --reviewed --gguf out/gguf
 scripts/pod.sh verify
 ```
+
+## License
+
+The project code and the model weights use the MIT license. See `LICENSE`.
+The dataset `Skorcht/yandere-her-dataset` states no license.
+The MIT license does not resolve the missing data license.
+
+**Caution:** Confirm the data license with the dataset owner before a public release.
+The project cannot grant rights that it does not hold.
 
 Download the Q8 GGUF and ask three probes with `--jinja`.
 

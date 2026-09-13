@@ -10,20 +10,20 @@ from verify_upload import REQUIRED, check_files, verify_manifest
 
 
 def test_the_required_files_exclude_xslm_artifacts():
-    expected = [name.format(name="xfrieren-1.7b") for name in REQUIRED]
-    assert check_files(expected, "xfrieren-1.7b") == []
+    expected = [name.format(name="xobsessed-1.7b") for name in REQUIRED]
+    assert check_files(expected, "xobsessed-1.7b") == []
     assert "tokenizer_config.json" in expected
     assert not any("instruct/" in name for name in expected)
 
 
 def test_the_verifier_reports_each_missing_file():
-    assert "model.safetensors" in check_files(["config.json"], "xfrieren-1.7b")
+    assert "model.safetensors" in check_files(["config.json"], "xobsessed-1.7b")
 
 
 def test_a_manifest_hashes_current_files(tmp_path):
     source = tmp_path / "weights.bin"
     source.write_bytes(b"new weights")
-    manifest = build_manifest({"model.safetensors": source}, "xfrieren-1.7b", "run-1")
+    manifest = build_manifest({"model.safetensors": source}, "xobsessed-1.7b", "run-1")
     assert manifest["run_id"] == "run-1"
     assert manifest["files"]["model.safetensors"] == {
         "sha256": hashlib.sha256(b"new weights").hexdigest(),
@@ -32,7 +32,7 @@ def test_a_manifest_hashes_current_files(tmp_path):
 
 
 def test_the_verifier_rejects_a_stale_run_before_files():
-    manifest = {"run_id": "new", "model_name": "xfrieren-1.7b", "files": {}}
+    manifest = {"run_id": "new", "model_name": "xobsessed-1.7b", "files": {}}
     api = SimpleNamespace(repo_info=lambda **kwargs: SimpleNamespace(sha="revision"))
     remote = json.dumps({**manifest, "run_id": "old"}).encode()
     faults = verify_manifest(api, "user/repo", manifest, read_remote=lambda *args: remote)
@@ -41,10 +41,10 @@ def test_the_verifier_rejects_a_stale_run_before_files():
 
 def test_the_verifier_rejects_a_wrong_weight_hash():
     files = {
-        name.format(name="xfrieren-1.7b"): {"size": 1, "sha256": "expected"}
+        name.format(name="xobsessed-1.7b"): {"size": 1, "sha256": "expected"}
         for name in REQUIRED
     }
-    manifest = {"run_id": "run-1", "model_name": "xfrieren-1.7b", "files": files}
+    manifest = {"run_id": "run-1", "model_name": "xobsessed-1.7b", "files": files}
     api = SimpleNamespace(
         repo_info=lambda **kwargs: SimpleNamespace(sha="revision"),
         get_paths_info=lambda **kwargs: [
@@ -61,8 +61,8 @@ def test_the_verifier_rejects_a_wrong_weight_hash():
 
 def test_the_verifier_accepts_current_hashes():
     digest = hashlib.sha256(b"x").hexdigest()
-    files = {name.format(name="xfrieren-1.7b"): {"size": 1, "sha256": digest} for name in REQUIRED}
-    manifest = {"run_id": "run-1", "model_name": "xfrieren-1.7b", "files": files}
+    files = {name.format(name="xobsessed-1.7b"): {"size": 1, "sha256": digest} for name in REQUIRED}
+    manifest = {"run_id": "run-1", "model_name": "xobsessed-1.7b", "files": files}
     api = SimpleNamespace(
         repo_info=lambda **kwargs: SimpleNamespace(sha="revision"),
         get_paths_info=lambda **kwargs: [

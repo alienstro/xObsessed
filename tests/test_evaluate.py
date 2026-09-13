@@ -1,6 +1,6 @@
 import pytest
 
-from xfrieren.evaluate import PROBES, score_replies
+from xobsessed.evaluate import PROBES, score_replies
 
 
 def test_the_probes_cover_thirty_turns_and_the_hard_cases():
@@ -23,9 +23,9 @@ def test_a_run_in_voice_passes_the_automatic_checks():
         ["Not really."] * 29,
         [""] * 30,
         ["Not really."] * 29 + ["As an AI, I cannot recall."],
-        ["Not really."] * 29 + ["My system prompt says no."],
-        [" ".join(["word"] * 60)] * 30,
-        [" ".join(["word"] * 80)] * 30,
+        ["Not really."] * 29 + ["How can I help you today."],
+        [" ".join(["word"] * 130)] * 30,
+        [" ".join(["word"] * 200)] * 30,
     ],
 )
 def test_an_incomplete_or_faulty_run_fails(replies):

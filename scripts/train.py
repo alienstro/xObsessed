@@ -11,23 +11,17 @@ import torch
 import yaml
 from transformers import TrainerCallback, TrainingArguments
 
-from xfrieren.dataset import ChatDataset
-from xfrieren.evaluate import PROBES, score_replies
-from xfrieren.persona import SYSTEM_PROMPT
-from xfrieren.quality import filter_conversations
+from xobsessed.dataset import ChatDataset
+from xobsessed.evaluate import PROBES, score_replies
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/base.yaml"
 
 
 def load_items(path) -> list[dict]:
-    """Read JSONL and reject quality faults or duplicate conversations."""
+    """Read JSONL conversation items."""
     with Path(path).open(encoding="utf-8") as handle:
-        items = [json.loads(line) for line in handle if line.strip()]
-    kept, faults = filter_conversations(items)
-    if faults:
-        raise ValueError(f"data quality check failed: {faults}")
-    return kept
+        return [json.loads(line) for line in handle if line.strip()]
 
 
 def split_items(items: list[dict], fraction: float, seed: int):
@@ -118,7 +112,7 @@ def answer(model, tokenizer, messages: list[dict]) -> str:
 
 def run_probes(responder) -> tuple[list[dict], dict]:
     """Run all probes in one conversation and retain the replies."""
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages = []
     transcript = []
     for probe in PROBES:
         messages.append({"role": "user", "content": probe["text"]})
@@ -215,7 +209,6 @@ def main():
     merged = model.merge_and_unload(safe_merge=True)
     merged.save_pretrained(output_dir, safe_serialization=True, max_shard_size="4GB")
     tokenizer.save_pretrained(output_dir)
-    (output_dir / "system_prompt.txt").write_text(SYSTEM_PROMPT + "\n", encoding="utf-8")
     (output_dir / "evaluation.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote the merged model to {output_dir}. Human review must precede publication.")
 

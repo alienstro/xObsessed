@@ -7,15 +7,16 @@
 - Use Simplified Technical English for text that a person reads.
 - Keep the base model ID `Qwen/Qwen3-1.7B-Instruct`.
 - Do not substitute another base model without approval.
-- Use original, wholesome conversation text.
-- Do not copy anime, manga, or subtitle text.
-- Add or modify tests only when the user requests tests.
+- Use the dataset `Skorcht/yandere-her-dataset` as the data source.
+- Run `scripts/prepare_data.py` to build `data/raw.jsonl`.
+- Pin the dataset revision in `configs/base.yaml` before a release run.
+- Confirm the dataset license with the owner before publication.
+- Keep the MIT license in `LICENSE` for the code and the weights.
 - Keep credentials in `.env`.
 - Never commit credentials or generated weights.
 - Run the tests before each implementation commit.
 - Do not run a full model on the 8 GB laptop.
 - Request permission before an additional remote process or a paid run.
-- Review generated data before model training.
 - Review model replies and the base license before publication.
 - Verify current upload hashes before pod termination.
 - Do not delete a pod automatically.

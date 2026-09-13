@@ -43,7 +43,7 @@ def test_the_pod_helper_reports_a_missing_connection(tmp_path):
 def test_the_pod_helper_has_a_separate_data_transfer():
     text = (SCRIPTS / "pod.sh").read_text()
     assert "data)" in text
-    assert "/workspace/xFrieren" in text
+    assert "/workspace/xObsessed" in text
     assert "--delete" not in text
 
 
@@ -52,10 +52,11 @@ def test_the_gitignore_holds_the_secret_file():
 
 
 def test_the_card_states_the_limits_without_false_success_claims():
-    from xfrieren.card import build_card
+    from xobsessed.card import build_card
 
-    card = build_card("xfrieren-1.7b", "user/repo")
-    for value in ("invents", "fan work", "non-commercial", "--jinja", "system_prompt.txt"):
+    card = build_card("xobsessed-1.7b", "user/repo")
+    for value in ("wrong answer", "skorcht/yandere-her-dataset", "no license", "--jinja",
+                  "license: mit", "mit license"):
         assert value in card.lower()
     assert "unverified" in card.lower()
 
@@ -72,7 +73,7 @@ def test_remote_arguments_remain_literal(tmp_path):
     env = dict(os.environ, PATH=f"{tmp_path}:{os.environ['PATH']}",
                ENV_FILE=str(tmp_path / "absent.env"), POD_SSH="root@192.0.2.1",
                SSH_LOG=str(log))
-    argument = "a'b $(touch /tmp/xfrieren-shell-must-not-run)"
+    argument = "a'b $(touch /tmp/xobsessed-shell-must-not-run)"
     subprocess.run(
         ["bash", str(SCRIPTS / "pod.sh"), "run", "printf", "%s", argument],
         env=env, check=True,
@@ -80,12 +81,12 @@ def test_remote_arguments_remain_literal(tmp_path):
     remote = json.loads(log.read_text())[-1]
     # Parse each shell layer without an SSH connection or a tmux process.
     script = "tmux() { printf '%s\\0' \"$@\"; }; " + remote.replace(
-        "cd '/workspace/xFrieren' && mkdir -p out && ", ""
+        "cd '/workspace/xObsessed' && mkdir -p out && ", ""
     )
     result = subprocess.run(["bash", "-c", script], capture_output=True, check=True)
     command = result.stdout.decode().split("\0")[-2]
     assert "bash" in command
-    assert not Path("/tmp/xfrieren-shell-must-not-run").exists()
+    assert not Path("/tmp/xobsessed-shell-must-not-run").exists()
     import shlex
 
     layers = shlex.split(command)

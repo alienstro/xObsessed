@@ -14,7 +14,7 @@ def build_request(method, path, token):
     return urllib.request.Request(
         f"{BASE_URL}/{path}",
         method=method,
-        headers={"Authorization": f"Bearer {token}", "User-Agent": "xfrieren/0.1"},
+        headers={"Authorization": f"Bearer {token}", "User-Agent": "xobsessed/0.1"},
     )
 
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-from xfrieren.card import build_card
+from xobsessed.card import build_card
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -56,7 +56,7 @@ def main():
         path.name: path for path in sorted(merged.iterdir())
         if path.is_file() and path.suffix in (".json", ".safetensors", ".jinja", ".txt", ".md")
     }
-    for name in ("config.json", "tokenizer.json", "tokenizer_config.json", "system_prompt.txt"):
+    for name in ("config.json", "tokenizer.json", "tokenizer_config.json"):
         if name not in files:
             parser.error(f"the merged model lacks {name}")
     if arguments.gguf:

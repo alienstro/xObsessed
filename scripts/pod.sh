@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REMOTE_DIR="/workspace/xFrieren"
+REMOTE_DIR="/workspace/xObsessed"
 ENV_FILE="${ENV_FILE:-.env}"
 UV="${UV:-/root/.local/bin/uv}"
 if [ -f "$ENV_FILE" ]; then
@@ -77,7 +77,7 @@ run)
     printf -v COMMAND '%q ' "$@"
     printf -v UV_COMMAND '%q ' "$UV" run --env-file .env
     printf -v JOB '%q ' bash -o pipefail -c "${UV_COMMAND}${COMMAND}2>&1 | tee out/job.log"
-    printf -v START '%q ' tmux new-session -d -s xfrieren-job "$JOB"
+    printf -v START '%q ' tmux new-session -d -s xobsessed-job "$JOB"
     # Use one job session. A second command cannot replace an active job.
     remote "cd '$REMOTE_DIR' && mkdir -p out && $START"
     ;;

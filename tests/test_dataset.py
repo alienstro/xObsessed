@@ -3,8 +3,7 @@ import re
 import pytest
 import torch
 
-from xfrieren.dataset import IGNORE_INDEX, ChatDataset, build_example
-from xfrieren.persona import SYSTEM_PROMPT
+from xobsessed.dataset import IGNORE_INDEX, ChatDataset, build_example
 
 
 class FakeTokenizer:
@@ -39,10 +38,7 @@ def test_the_labels_cover_reply_content_and_end_markers_alone():
     ids, labels = build_example(tokenizer, conversation(), max_length=256)
     assert len(ids) == len(labels)
     learned = [value for value in labels if value != IGNORE_INDEX]
-    text = tokenizer.apply_chat_template(
-        [{"role": "system", "content": SYSTEM_PROMPT}] + conversation(),
-        enable_thinking=False,
-    )
+    text = tokenizer.apply_chat_template(conversation(), enable_thinking=False)
     words = text.split()
     assert [words[value - 1] for value in learned] == [
         "Of", "course", "<end>", "Not", "really", "<end>"
