@@ -15,8 +15,25 @@ llama cli -m path/to/xobsessed-1.7b-Q6_K.gguf \
   -t 8 \
   --temp 0.7 \
   --top-p 0.8 \
-  --repeat-penalty 1.15
+  --repeat-penalty 1.15 \
+  --repeat-last-n 64
 ```
+
+### Control Reply Length and Repetition
+
+Character models can generate repetitive text or long answers if you omit length limits. Use these recommended flags to keep turns brief and prevent looping:
+
+| Parameter | Recommended Value | Purpose |
+| :--- | :--- | :--- |
+| `-n` | `80` (or `50`) | Limits maximum tokens to keep replies concise. |
+| `--jinja` | *Flag* | Applies the native Qwen chat template and stops on `<|im_end|>`. |
+| `--repeat-penalty` | `1.15` | Penalizes repeated tokens to stop phrase loops. |
+| `--repeat-last-n` | `64` | Checks repetition across the last 64 generated tokens. |
+| `--top-p` | `0.8` | Restricts word choices to high-probability tokens. |
+| `--temp` | `0.7` | Balances character personality and reply coherence. |
+
+> [!TIP]
+> If you want brief one-to-two sentence replies, reduce `-n 80` to `-n 50`.
 
 ### Run as an API Server
 
