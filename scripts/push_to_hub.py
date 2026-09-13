@@ -28,6 +28,7 @@ def main():
     parser = argparse.ArgumentParser(description="Publish reviewed merged weights and optional GGUF files.")
     parser.add_argument("--reviewed", action="store_true")
     parser.add_argument("--gguf", type=Path)
+    parser.add_argument("--adapter", type=Path)
     arguments = parser.parse_args()
     if not arguments.reviewed:
         parser.error("review the data, character replies, and license, then pass --reviewed")
@@ -44,8 +45,8 @@ def main():
     if report.get("base_model") != config["model"]["base"]:
         parser.error("the run uses a different base model")
     model_config = json.loads((merged / "config.json").read_text(encoding="utf-8"))
-    if model_config.get("model_type") != "qwen3":
-        parser.error("the merged model must use the Qwen3 architecture")
+    if model_config.get("model_type") not in ("qwen2", "qwen3"):
+        parser.error("the merged model must use the Qwen2 or Qwen3 architecture")
     tokenizer_config = json.loads((merged / "tokenizer_config.json").read_text(encoding="utf-8"))
     if not tokenizer_config.get("chat_template") and not (merged / "chat_template.jinja").is_file():
         parser.error("the merged tokenizer has no chat template")
@@ -66,6 +67,10 @@ def main():
             if not path.is_file():
                 parser.error(f"the GGUF file is absent: {path}")
             files[f"gguf/{name}"] = path
+    if arguments.adapter:
+        for path in sorted(arguments.adapter.iterdir()):
+            if path.is_file() and path.suffix in (".json", ".safetensors", ".jinja", ".txt", ".md"):
+                files[f"adapter/{path.name}"] = path
     manifest = build_manifest(files, model_name, uuid.uuid4().hex)
     manifest_path = ROOT / "out/upload-manifest.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,7 +1,7 @@
 """Build a model card without claims that tests cannot prove."""
 
 CARD = """---
-base_model: Qwen/Qwen3-1.7B-Instruct
+base_model: Qwen/Qwen3-1.7B
 license: mit
 datasets:
   - Skorcht/yandere-her-dataset

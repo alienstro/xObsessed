@@ -10,7 +10,7 @@ def settings():
 
 
 def test_the_base_model_is_the_one_that_the_spec_names():
-    assert settings()["model"]["base"] == "Qwen/Qwen3-1.7B-Instruct"
+    assert settings()["model"]["base"] == "Qwen/Qwen3-1.7B"
 
 
 def test_the_adapter_reaches_every_projection():

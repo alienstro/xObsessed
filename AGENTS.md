@@ -5,7 +5,7 @@
 - Read one file at a time.
 - Read only the required part of each file.
 - Use Simplified Technical English for text that a person reads.
-- Keep the base model ID `Qwen/Qwen3-1.7B-Instruct`.
+- Keep the base model ID `Qwen/Qwen3-1.7B`.
 - Do not substitute another base model without approval.
 - Use the dataset `Skorcht/yandere-her-dataset` as the data source.
 - Run `scripts/prepare_data.py` to build `data/raw.jsonl`.

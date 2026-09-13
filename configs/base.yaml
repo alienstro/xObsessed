@@ -1,5 +1,5 @@
 model:
-  base: Qwen/Qwen3-1.7B-Instruct
+  base: Qwen/Qwen3-1.7B
   max_length: 2048
 
 lora:
@@ -21,13 +21,14 @@ data:
   source:
     dataset: Skorcht/yandere-her-dataset
     split: train
-    revision: main
+    revision: 52886fd1e8632bef4a5ec19e52297199a390ebd8
 
 training:
   output_dir: out/merged
   adapter_dir: out/adapter
-  per_device_train_batch_size: 2
-  gradient_accumulation_steps: 8
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  max_steps: 300
   learning_rate: 1.0e-4
   min_learning_rate: 1.0e-5
   warmup_steps: 20
@@ -39,10 +40,13 @@ training:
   save_total_limit: 1
   time_limit_minutes: 90
   seed: 1337
+  optim: paged_adamw_8bit
 
 publish:
   model_name: xobsessed-1.7b
   quant_types:
+    - BF16
+    - F16
     - Q8_0
     - Q6_K
     - Q4_K_M

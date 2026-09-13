@@ -64,6 +64,7 @@ Read `out/evaluation.json`. Check all probe replies by hand.
 Warning: Keep the pod until the upload verifier reports success.
 
 ```bash
+scripts/pod.sh run git clone https://github.com/ggerganov/llama.cpp.git /workspace/xObsessed/llama.cpp
 scripts/pod.sh run scripts/push_to_hub.py --reviewed
 scripts/pod.sh run bash scripts/quantize.sh out/merged out/gguf xobsessed-1.7b
 scripts/pod.sh run scripts/push_to_hub.py --reviewed --gguf out/gguf

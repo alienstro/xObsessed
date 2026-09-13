@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import random
 import time
 from pathlib import Path
@@ -57,10 +58,14 @@ class TimeLimitCallback(TrainerCallback):
 
 def make_training_arguments(settings: dict, smoke: int = 0, use_bf16: bool = False):
     """Build Trainer settings with no worker subprocesses."""
+    optim = settings.get("optim", "paged_adamw_8bit" if use_bf16 else "adamw_torch")
+    if not torch.cuda.is_available() and optim.startswith("paged_"):
+        optim = "adamw_torch"
+    report_to = settings.get("report_to", ["wandb"]) if (os.environ.get("WANDB_API_KEY") and use_bf16) else []
     return TrainingArguments(
         output_dir=settings["adapter_dir"],
         num_train_epochs=settings["num_train_epochs"],
-        max_steps=smoke if smoke else -1,
+        max_steps=smoke if smoke else settings.get("max_steps", -1),
         per_device_train_batch_size=settings["per_device_train_batch_size"],
         per_device_eval_batch_size=1,
         gradient_accumulation_steps=settings["gradient_accumulation_steps"],
@@ -77,13 +82,13 @@ def make_training_arguments(settings: dict, smoke: int = 0, use_bf16: bool = Fal
         save_strategy="no" if smoke else "steps",
         save_steps=settings["save_steps"],
         save_total_limit=settings["save_total_limit"],
-        report_to=[],
+        report_to=report_to,
         seed=settings["seed"],
         dataloader_num_workers=0,
         dataloader_pin_memory=False,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
-        optim="adamw_torch",
+        optim=optim,
     )
 
 

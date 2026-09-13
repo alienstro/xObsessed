@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Convert merged weights and build three GGUF variants sequentially.
+# Convert merged weights and build five GGUF variants sequentially.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 STAGING="${1:-out/merged}"
@@ -21,6 +21,8 @@ if [ ! -x "$LLAMA_DIR/build/bin/llama-quantize" ]; then
 fi
 uv run --with gguf --with sentencepiece --with protobuf python "$LLAMA_DIR/convert_hf_to_gguf.py" \
     "$STAGING" --outfile "$OUTPUT/$NAME-BF16.gguf" --outtype bf16
+uv run --with gguf --with sentencepiece --with protobuf python "$LLAMA_DIR/convert_hf_to_gguf.py" \
+    "$STAGING" --outfile "$OUTPUT/$NAME-F16.gguf" --outtype f16
 for QUANT in Q8_0 Q6_K Q4_K_M; do
     "$LLAMA_DIR/build/bin/llama-quantize" \
         "$OUTPUT/$NAME-BF16.gguf" "$OUTPUT/$NAME-$QUANT.gguf" "$QUANT" "$BUILD_JOBS"

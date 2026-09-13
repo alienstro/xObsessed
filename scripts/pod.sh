@@ -94,8 +94,15 @@ manifest)
     mkdir -p out
     rsync -az -e "$TRANSPORT" "$HOST:$REMOTE_DIR/out/upload-manifest.json" out/
     ;;
+watchdog)
+    shift
+    DEADLINE="${1:-150}"
+    GRACE="${2:-15}"
+    printf -v WATCHDOG_JOB '%q ' bash -c "bash scripts/watchdog.sh $DEADLINE $GRACE 2>&1 | tee out/watchdog.log"
+    remote "cd '$REMOTE_DIR' && mkdir -p out && tmux new-session -d -s xobsessed-watchdog $WATCHDOG_JOB"
+    ;;
 *)
-    echo "Usage: pod.sh {check|sync|data|secrets|setup|run|watch|heartbeat|sessions|manifest|verify|pods|terminate}" >&2
+    echo "Usage: pod.sh {check|sync|data|secrets|setup|run|watch|heartbeat|sessions|manifest|verify|pods|terminate|watchdog}" >&2
     exit 1
     ;;
 esac

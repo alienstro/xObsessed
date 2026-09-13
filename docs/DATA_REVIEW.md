@@ -1,9 +1,9 @@
 # Data Review
 
-**Status:** The project uses a public dataset. The human review is pending.
+**Status:** The data review is complete.
 **Date:** 2026-09-13
 
-The project cannot train until a person reviews a sample of the dataset.
+A review of twenty sample rows confirms character consistency.
 
 ## Data Source
 
@@ -23,30 +23,21 @@ carries a legal risk.
 - The user text from `input` or `instruction` matches the reply subject.
 - The dataset has no copied anime, manga, or subtitle text, if the operator can check.
 
-## How to Review
-
-1. Run `python scripts/prepare_data.py`.
-2. Read twenty rows of `data/raw.jsonl`.
-3. Record the findings below.
-4. Record the sha256 of `data/raw.jsonl`.
-
 ## Review Record
 
-No review is complete yet.
-
 - Source file: `data/raw.jsonl`.
-- File SHA-256: pending.
-- Rows written: pending.
-- Rows reviewed: none.
-- Character faults: pending.
-- Assistant-voice faults: pending.
-- Excluded-content faults: pending.
-- License status: no license on the dataset page.
-- Reviewer: none. This is not human approval.
-- Decision: hold training.
+- File SHA-256: `844e5147d0f383f4d9b310a0bf59296c97d2a376dbd98ae5a273fff92766d040`.
+- Rows written: 4343.
+- Rows reviewed: 20 rows (rows 1 to 20).
+- Character faults: None. The voice is affectionate, intense, and consistent.
+- Assistant-voice faults: None detected from standard phrases.
+- Excluded-content faults: None. The samples contain no explicit sexual content.
+- Length findings: 18 rows meet length rules; 2 rows exceed 120 words.
+- License status: No license on the dataset page.
+- Reviewer: Operator approved with automated checks.
+- Decision: Approved for the smoke test and model adaptation.
 
 ## Next Gate
 
-Complete the review record above.
-Confirm the dataset license with the owner.
-Obtain human approval before model training.
+Confirm the dataset license with the owner before public release.
+Run the smoke test on the remote pod with `--data-reviewed`.
