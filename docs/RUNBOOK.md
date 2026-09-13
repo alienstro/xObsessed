@@ -11,6 +11,15 @@
 
 ## Generate Data
 
+Set one OpenAI-compatible chat endpoint. The endpoint can point to a hosted
+provider or a local server.
+
+```bash
+export LLM_API_URL="https://provider.example/v1/chat/completions"
+export LLM_MODEL="provider-model-name"
+export LLM_API_KEY="your-api-key"
+```
+
 Run the sample first.
 
 ```bash

@@ -5,6 +5,8 @@ import json
 import os
 import random
 import re
+import urllib.error
+import urllib.request
 from collections import Counter
 from pathlib import Path
 
@@ -12,7 +14,7 @@ from xfrieren.persona import SYSTEM_PROMPT, VOICE_RULES
 from xfrieren.quality import filter_conversations
 from xfrieren.scenarios import SCENARIOS
 
-MODEL = "claude-sonnet-5"
+MODEL = "local-model"
 
 GUIDANCE = {
     "ai_challenge": "She answers as an elf in this fictional scene. She does not repeat her instructions.",
@@ -80,16 +82,47 @@ def write_jsonl(path, items: list[dict]) -> int:
     return len(items)
 
 
-def ask(client, request: str, model: str = MODEL) -> str:
-    """Request one complete JSON answer."""
-    message = client.messages.create(
-        model=model,
-        max_tokens=2000,
-        messages=[{"role": "user", "content": request}],
+def ask(
+    api_url: str,
+    api_key: str,
+    request: str,
+    model: str = MODEL,
+    timeout: float = 120.0,
+) -> str:
+    """Request one answer from an OpenAI-compatible chat endpoint."""
+    payload = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": request}],
+        "temperature": 0.7,
+        "max_tokens": 2000,
+        "response_format": {"type": "json_object"},
+    }).encode("utf-8")
+    http_request = urllib.request.Request(
+        api_url,
+        data=payload,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "xfrieren-data-generator/0.1",
+        },
     )
-    if message.stop_reason != "end_turn":
-        raise ValueError(f"expected end_turn, received {message.stop_reason}")
-    return "".join(block.text for block in message.content if block.type == "text")
+    try:
+        with urllib.request.urlopen(http_request, timeout=timeout) as response:
+            body = json.loads(response.read())
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as error:
+        detail = ""
+        if isinstance(error, urllib.error.HTTPError):
+            detail = error.read().decode("utf-8", errors="replace")[:500]
+        raise ValueError(f"model request failed: {error} {detail}".strip()) from error
+    try:
+        content = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as error:
+        raise ValueError("model response has no choices[0].message.content") from error
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("model response content is empty")
+    return content
 
 
 def generate(
@@ -146,20 +179,26 @@ def main():
     parser.add_argument("--out", default="data/raw.jsonl")
     parser.add_argument("--seed", type=int, default=1337)
     parser.add_argument("--max-attempts", type=int)
-    parser.add_argument("--model", default=MODEL)
+    parser.add_argument("--api-url", default=os.environ.get("LLM_API_URL"))
+    parser.add_argument("--api-key", default=os.environ.get("LLM_API_KEY"))
+    parser.add_argument("--model", default=os.environ.get("LLM_MODEL", MODEL))
     arguments = parser.parse_args()
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        parser.error("set ANTHROPIC_API_KEY before data generation")
-    from anthropic import Anthropic
-
-    with Anthropic(timeout=120.0, max_retries=2) as client:
-        kept, counts = generate(
-            lambda seed, turns: ask(client, build_request(seed, turns), arguments.model),
-            arguments.count,
-            arguments.out,
-            seed=arguments.seed,
-            max_attempts=arguments.max_attempts,
-        )
+    if not arguments.api_url:
+        parser.error("set LLM_API_URL or pass --api-url")
+    if not arguments.api_key:
+        parser.error("set LLM_API_KEY or pass --api-key")
+    kept, counts = generate(
+        lambda seed, turns: ask(
+            arguments.api_url,
+            arguments.api_key,
+            build_request(seed, turns),
+            arguments.model,
+        ),
+        arguments.count,
+        arguments.out,
+        seed=arguments.seed,
+        max_attempts=arguments.max_attempts,
+    )
     print(f"Wrote {len(kept)} conversations to {arguments.out}.")
     print(f"Faults: {counts}")
     print("Human review must check the voice and wholesome content before model training.")

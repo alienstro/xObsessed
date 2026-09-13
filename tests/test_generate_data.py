@@ -50,11 +50,50 @@ def test_the_writer_writes_one_object_on_each_line(tmp_path):
     assert len(path.read_text().splitlines()) == 2
 
 
-def test_the_api_call_rejects_a_truncated_answer():
-    client = SimpleNamespace(messages=SimpleNamespace(create=lambda **kwargs:
-        SimpleNamespace(stop_reason="max_tokens", content=[])))
-    with pytest.raises(ValueError, match="end_turn"):
-        ask(client, "request")
+def test_the_api_call_reads_an_openai_compatible_response(monkeypatch):
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return json.dumps({
+                "choices": [{"message": {"content": '{"messages": []}'}}]
+            }).encode()
+
+    captured = {}
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        captured["authorization"] = request.headers["Authorization"]
+        captured["payload"] = json.loads(request.data)
+        return Response()
+
+    monkeypatch.setattr("generate_data.urllib.request.urlopen", fake_urlopen)
+    assert ask("https://example.test/v1/chat/completions", "secret", "request", "model") == (
+        '{"messages": []}'
+    )
+    assert captured["url"].endswith("/chat/completions")
+    assert captured["authorization"] == "Bearer secret"
+    assert captured["payload"]["model"] == "model"
+
+
+def test_the_api_call_rejects_a_malformed_response(monkeypatch):
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b'{"choices": []}'
+
+    monkeypatch.setattr("generate_data.urllib.request.urlopen", lambda *args, **kwargs: Response())
+    with pytest.raises(ValueError, match="choices"):
+        ask("https://example.test/v1/chat/completions", "secret", "request")
 
 
 def test_generation_counts_accepted_items_and_preserves_progress(tmp_path):
