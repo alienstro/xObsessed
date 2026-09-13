@@ -71,3 +71,32 @@ def test_the_loader_rejects_invalid_data(tmp_path):
     path.write_text(json.dumps({"messages": []}) + "\n")
     with pytest.raises(ValueError, match="quality"):
         load_items(path)
+
+
+def test_a_tiny_qwen_model_completes_one_lora_step(tmp_path):
+    import torch
+    from peft import LoraConfig, get_peft_model
+    from transformers import Qwen3Config, Qwen3ForCausalLM, Trainer
+    from xfrieren.dataset import ChatDataset
+    from test_dataset import FakeTokenizer, conversation
+
+    torch.set_num_threads(1)
+    model = Qwen3ForCausalLM(Qwen3Config(
+        vocab_size=256, hidden_size=16, intermediate_size=32,
+        num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=1,
+        head_dim=8, max_position_embeddings=256, use_cache=False,
+    ))
+    model = get_peft_model(model, LoraConfig(
+        r=2, lora_alpha=4, target_modules=["q_proj", "v_proj"], task_type="CAUSAL_LM"
+    ))
+    config = settings()["training"]
+    config["adapter_dir"] = str(tmp_path / "adapter")
+    args = make_training_arguments(config, smoke=1, use_bf16=False)
+    args.use_cpu = True
+    args.gradient_accumulation_steps = 1
+    args.per_device_train_batch_size = 1
+    dataset = ChatDataset([{"messages": conversation()}], FakeTokenizer(), 128)
+    trainer = Trainer(model=model, args=args, train_dataset=dataset)
+    result = trainer.train()
+    assert result.global_step == 1
+    assert 0 < result.training_loss < 20

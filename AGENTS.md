@@ -1,0 +1,22 @@
+# Project Rules
+
+- Use one agent and one active command at a time.
+- Do not create a worktree or another agent without explicit permission.
+- Read one file at a time.
+- Read only the required part of each file.
+- Use Simplified Technical English for text that a person reads.
+- Keep the base model ID `Qwen/Qwen3-1.7B-Instruct`.
+- Do not substitute another base model without approval.
+- Use original, wholesome conversation text.
+- Do not copy anime, manga, or subtitle text.
+- Add or modify tests only when the user requests tests.
+- Keep credentials in `.env`.
+- Never commit credentials or generated weights.
+- Run the tests before each implementation commit.
+- Do not run a full model on the 8 GB laptop.
+- Request permission before an additional remote process or a paid run.
+- Review generated data before model training.
+- Review model replies and the base license before publication.
+- Verify current upload hashes before pod termination.
+- Do not delete a pod automatically.
+- Do not add AI attribution to commits.
